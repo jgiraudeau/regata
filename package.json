@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "rm -rf node_modules/@types/mapbox__point-geometry"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
@@ -20,6 +21,7 @@
   "devDependencies": {
     "@mapbox/point-geometry": "^1.1.0",
     "@tailwindcss/postcss": "^4",
+    "@types/mapbox__point-geometry": "^1.0.87",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
