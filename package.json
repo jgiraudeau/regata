@@ -10,7 +10,7 @@
     "postinstall": "rm -rf node_modules/@types/mapbox__point-geometry"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.78.0",
+    "@anthropic-ai/sdk": "^0.28.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.98.0",
     "mapbox-gl": "^3.19.0",
