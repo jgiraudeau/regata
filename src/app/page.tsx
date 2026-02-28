@@ -245,7 +245,8 @@ export default function Home() {
       try {
         data = JSON.parse(text);
       } catch {
-        throw new Error('Erreur serveur — réessayez');
+        // If it's not JSON, it might be an HTML error page (e.g. 504 Timeout or 500 error)
+        throw new Error(`Erreur serveur: ${res.status} ${res.statusText}`);
       }
 
       if (!res.ok) throw new Error(data.error || 'Erreur');

@@ -72,8 +72,10 @@ export async function POST(request: Request) {
         tide,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Briefing error:', error);
-    return NextResponse.json({ error: 'Erreur lors de la génération du briefing' }, { status: 500 });
+    return NextResponse.json({
+      error: error.message || 'Erreur lors de la génération du briefing'
+    }, { status: 500 });
   }
 }
