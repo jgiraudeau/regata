@@ -2,10 +2,6 @@ import Anthropic from '@anthropic-ai/sdk';
 import type { Zone, Course, Schedule, WindPoint, WavePoint, TideData, CurrentGrid, TacticalBriefing } from '@/types';
 import { buildTacticalPrompt } from './prompts/tactical';
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
-
 export async function generateBriefing(
   zone: Zone,
   course: Course,
@@ -15,6 +11,14 @@ export async function generateBriefing(
   tide: TideData,
   currents?: CurrentGrid
 ): Promise<TacticalBriefing> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error("Clé API Anthropic manquante sur le serveur (vérifiez les variables d'environnement Vercel).");
+  }
+
+  const anthropic = new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  });
+
   const prompt = buildTacticalPrompt(zone, course, schedule, wind, waves, tide, currents);
 
   const message = await anthropic.messages.create({
