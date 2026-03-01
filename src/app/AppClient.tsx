@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { LogOut } from 'lucide-react';
 import type { Zone, Course, CourseType, TacticalBriefing, WindPoint, WavePoint, TideData } from '@/types';
 
 const courseTypes: { value: CourseType; label: string; icon: string }[] = [
@@ -168,7 +170,14 @@ const zonesByRegion: { region: string; zones: PresetZone[] }[] = [
 type Step = 'config' | 'loading' | 'briefing';
 
 export default function Home() {
+  const router = useRouter();
   const [step, setStep] = useState<Step>('config');
+
+  async function handleLogout() {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.refresh();
+  }
+
 
   // Config state
   const [zoneName, setZoneName] = useState('');
@@ -280,10 +289,19 @@ export default function Home() {
 
   if (step === 'briefing' && briefing) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-8">
-        <button onClick={() => setStep('config')} className="mb-6 text-sm text-slate-500 hover:text-slate-700">
-          ← Nouvelle analyse
-        </button>
+      <div className="mx-auto max-w-4xl px-4 py-8 relative">
+        <div className="flex justify-between items-center mb-6">
+          <button onClick={() => setStep('config')} className="text-sm text-slate-500 hover:text-slate-700">
+            ← Nouvelle analyse
+          </button>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-sm text-slate-500 hover:text-red-600 transition"
+          >
+            Déconnexion
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
 
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-slate-900">Briefing Tactique</h1>
@@ -437,8 +455,19 @@ export default function Home() {
 
   // === CONFIG VIEW ===
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
-      <div className="mb-8 text-center">
+    <div className="mx-auto max-w-2xl px-4 py-8 relative">
+      <div className="absolute top-8 right-4">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 text-sm text-slate-400 hover:text-red-500 transition px-3 py-1.5 rounded-lg hover:bg-red-50"
+          title="Quitter le pont"
+        >
+          <span className="hidden sm:inline">Quitter</span>
+          <LogOut className="w-4 h-4" />
+        </button>
+      </div>
+
+      <div className="mb-8 text-center pt-6">
         <h1 className="text-4xl font-bold tracking-tight text-slate-900">Regatta</h1>
         <p className="mt-2 text-lg text-slate-500">Briefing tactique IA pour la régate</p>
       </div>
