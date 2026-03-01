@@ -234,7 +234,8 @@ export default function Home() {
 
       setProgress('Analyse tactique par IA en cours...');
 
-      const res = await fetch('/api/briefing', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const res = await fetch(`${apiUrl}/api/briefing`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ zone, course, schedule }),
