@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import AppClient from './AppClient';
-import Landing from '@/components/Landing';
+import Landing from '../components/Landing';
 
 export default async function Home() {
   const cookieStore = await cookies();

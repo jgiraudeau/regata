@@ -243,7 +243,7 @@ export default function Home() {
         races: parseInt(races),
       };
 
-      setProgress('Analyse tactique par IA en cours...');
+      setProgress('Analyse tactique en cours...');
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
       const res = await fetch(`${apiUrl}/api/briefing`, {
@@ -469,7 +469,7 @@ export default function Home() {
 
       <div className="mb-8 text-center pt-6">
         <h1 className="text-4xl font-bold tracking-tight text-slate-900">Regatta</h1>
-        <p className="mt-2 text-lg text-slate-500">Briefing tactique IA pour la régate</p>
+        <p className="mt-2 text-lg text-slate-500">Briefing tactique pour la régate</p>
       </div>
 
       <div className="space-y-6">
@@ -680,7 +680,7 @@ export default function Home() {
       </div>
 
       <p className="mt-8 text-center text-xs text-slate-400">
-        Données : AROME Météo-France (vent) + MFWAM (houle) + WorldTides (marées) — Analyse : IA
+        Données : AROME Météo-France (vent) + MFWAM (houle) + WorldTides (marées)
       </p>
     </div>
   );

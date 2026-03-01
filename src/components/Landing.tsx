@@ -57,7 +57,7 @@ export default function Landing() {
                     </div>
 
                     <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300 mb-6 leading-tight">
-                        L'intelligence artificielle au service de votre stratégie de course.
+                        Préparez votre stratégie de course.
                     </h2>
 
                     <p className="text-lg text-slate-400 mb-10 leading-relaxed">
@@ -68,7 +68,7 @@ export default function Landing() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <Feature icon={<Wind className="text-blue-400" />} title="Modèles météo HR" desc="Vent et rafales (AROME Météo-France)" />
                         <Feature icon={<Compass className="text-indigo-400" />} title="Analyse de zone" desc="Analyse topographique intelligente" />
-                        <Feature icon={<Navigation className="text-teal-400" />} title="IA Tactique" desc="Recommandations d'options tactiques" />
+                        <Feature icon={<Navigation className="text-teal-400" />} title="Analyse Tactique" desc="Recommandations d'options tactiques" />
                     </div>
                 </div>
             </div>
