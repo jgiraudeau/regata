@@ -39,6 +39,7 @@ const zonesByRegion: { region: string; zones: PresetZone[] }[] = [
       },
       { name: 'Deauville', lat: 49.36, lng: 0.07, info: 'Baie de Seine, courants modérés' },
       { name: 'Saint-Vaast', lat: 49.59, lng: -1.26, info: 'Courants de marée complexes' },
+      { name: 'Carantec', lat: 48.66, lng: -3.91, info: 'Ile Callot, courants forts et îlots' },
       { name: 'Roscoff', lat: 48.73, lng: -3.98, info: 'Île de Batz, courants variables' },
     ],
   },
@@ -57,6 +58,7 @@ const zonesByRegion: { region: string; zones: PresetZone[] }[] = [
         ]
       },
       { name: 'Baie de Morlaix', lat: 48.65, lng: -3.87, info: 'Chenal d\'approche, courants' },
+      { name: 'Carantec', lat: 48.66, lng: -3.91, info: 'Ile Callot, courants forts et îlots' },
       { name: 'Perros-Guirec', lat: 48.82, lng: -3.44, info: 'Archipel des 7 Îles' },
       { name: 'Saint-Quay', lat: 48.68, lng: -2.83, info: 'Baie de Saint-Brieuc' },
       { name: 'Paimpol', lat: 48.78, lng: -3.05, info: 'Île de Bréhat, courants forts' },
