@@ -169,6 +169,18 @@ const zonesByRegion: { region: string; zones: PresetZone[] }[] = [
       { name: 'Bonifacio', lat: 41.39, lng: 9.16, info: 'Bouches, courants et vent fort' },
     ],
   },
+  {
+    region: 'Lacs du Sud',
+    zones: [
+      { name: 'Lac de Sainte-Croix', lat: 43.76, lng: 6.15, info: 'Sainte-Croix-du-Verdon, thermique estival' },
+      {
+        name: 'Lac de Serre-Ponçon', lat: 44.53, lng: 6.40, info: 'Lac alpin, thermique puissant et vents tournants', subZones: [
+          { name: 'Club nautique d\'Embrun', lat: 44.56, lng: 6.49, info: 'Bassin d\'Embrun et sortie sur le lac' },
+          { name: 'Vers Savines et le Pont', lat: 44.53, lng: 6.40, info: 'Pont de Savines-le-Lac, passage encaissé' },
+        ]
+      },
+    ],
+  },
 ];
 
 type Step = 'config' | 'loading' | 'briefing';
