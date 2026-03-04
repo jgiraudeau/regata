@@ -131,8 +131,12 @@ const zonesByRegion: { region: string; zones: PresetZone[] }[] = [
         ]
       },
       {
+        name: 'Toulon Le Mourillon', lat: 43.10, lng: 5.94, info: 'Plages du Mourillon, Rade des Vignettes'
+      },
+      {
         name: 'Hyères', lat: 43.08, lng: 6.15, info: 'Îles d\'Or, thermique fiable', subZones: [
           { name: 'Rade d\'Hyères', lat: 43.05, lng: 6.18, info: 'Devant la presqu\'île de Giens' },
+          { name: 'L\'Almanarre', lat: 43.05, lng: 6.13, info: 'Spot mythique, exposé Mistral (Ouest)' },
           { name: 'Devant Porquerolles', lat: 43.00, lng: 6.20, info: 'Large, thermique stable' },
           { name: 'Passe de Porquerolles', lat: 43.02, lng: 6.15, info: 'Effets de cap, accélérations' },
         ]
