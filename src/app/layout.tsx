@@ -5,7 +5,7 @@ import './globals.css';
 const geist = Geist({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Regatta — Briefing Tactique',
+  title: 'Regata — Briefing Tactique',
   description: 'Analyse des conditions de navigation et briefing tactique intelligent pour la régate',
 };
 

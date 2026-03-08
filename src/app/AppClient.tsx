@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { LogOut } from 'lucide-react';
-import type { Zone, Course, CourseType, TacticalBriefing, WindPoint, WavePoint, TideData } from '@/types';
+import type { Zone, Course, CourseType, TacticalBriefing, WindPoint, WavePoint, TideData, Mark } from '@/types';
+import MapLoader from '@/components/MapLoader';
 
 const courseTypes: { value: CourseType; label: string; icon: string }[] = [
   { value: 'banane', label: 'Banane', icon: '🍌' },
@@ -12,6 +13,36 @@ const courseTypes: { value: CourseType; label: string; icon: string }[] = [
   { value: 'au_large', label: 'Au large', icon: '🌊' },
   { value: 'parcours_permanent', label: 'Permanent', icon: '📍' },
 ];
+
+// Étapes de construction du parcours par type
+const courseSteps: Record<CourseType, { name: string; instruction: string; tip: string }[]> = {
+  banane: [
+    { name: 'Ligne de départ', instruction: 'Placez le bateau comité (côté tribord de la ligne)', tip: 'Cliquez sur la carte à l\'emplacement du comité de course' },
+    { name: 'Bouée au vent', instruction: 'Placez la bouée au vent (face au vent dominant)', tip: 'Placez-la dans l\'axe du vent par rapport à la ligne de départ' },
+    { name: 'Bouée sous le vent', instruction: 'Placez la bouée sous le vent (optionnel)', tip: 'Optionnel : entre la ligne et la bouée au vent, décalée' },
+  ],
+  triangle_olympique: [
+    { name: 'Ligne de départ', instruction: 'Placez le bateau comité (côté tribord de la ligne)', tip: 'Cliquez sur la carte à l\'emplacement du comité de course' },
+    { name: 'Bouée au vent', instruction: 'Placez la bouée au vent (marque 1)', tip: 'Face au vent, en haut du parcours' },
+    { name: 'Bouée de largue', instruction: 'Placez la bouée de largue (marque 2)', tip: 'À ~120° de l\'axe vent, crée le bord de largue' },
+    { name: 'Bouée sous le vent', instruction: 'Placez la bouée sous le vent (marque 3, optionnel)', tip: 'Optionnel : complète le triangle' },
+  ],
+  cotier: [
+    { name: 'Ligne de départ', instruction: 'Placez le bateau comité (départ)', tip: 'Cliquez sur la carte à l\'emplacement du comité de course' },
+    { name: 'Marque côtière 1', instruction: 'Placez la première marque de passage', tip: 'Point de passage le long de la côte' },
+    { name: 'Marque côtière 2', instruction: 'Placez les marques suivantes du parcours côtier', tip: 'Continuez à poser les marques de passage' },
+  ],
+  au_large: [
+    { name: 'Ligne de départ', instruction: 'Placez le bateau comité (départ)', tip: 'Cliquez sur la carte à l\'emplacement du comité de course' },
+    { name: 'Waypoint 1', instruction: 'Placez le premier waypoint au large', tip: 'Point de passage vers le large' },
+    { name: 'Waypoints suivants', instruction: 'Continuez à placer les waypoints', tip: 'Ajoutez autant de points que nécessaire' },
+  ],
+  parcours_permanent: [
+    { name: 'Départ', instruction: 'Placez le point de départ du parcours permanent', tip: 'Cliquez sur la carte au point de départ' },
+    { name: 'Marque 1', instruction: 'Placez la première marque permanente', tip: 'Bouée ou amer fixe' },
+    { name: 'Marques suivantes', instruction: 'Continuez à placer les marques du parcours', tip: 'Ajoutez toutes les marques du parcours permanent' },
+  ],
+};
 
 interface PresetZone {
   name: string;
@@ -199,6 +230,7 @@ export default function Home() {
   const [zoneName, setZoneName] = useState('');
   const [lat, setLat] = useState('');
   const [lng, setLng] = useState('');
+  const [marks, setMarks] = useState<Mark[]>([]);
   const [courseType, setCourseType] = useState<CourseType>('banane');
   const [orientation, setOrientation] = useState('');
   const [raceDate, setRaceDate] = useState(new Date().toISOString().split('T')[0]);
@@ -219,6 +251,7 @@ export default function Home() {
     setZoneName(preset.name);
     setLat(preset.lat.toString());
     setLng(preset.lng.toString());
+    setMarks([{ lat: preset.lat, lng: preset.lng, name: preset.name }]);
     // Si c'est une zone parent avec sous-zones, on l'ouvre
     if ('subZones' in preset && preset.subZones) {
       setSelectedParentZone(preset as PresetZone);
@@ -228,9 +261,32 @@ export default function Home() {
   }
 
   function selectSubZone(sub: { name: string; lat: number; lng: number; info: string }, parentName: string) {
-    setZoneName(`${parentName} — ${sub.name}`);
+    const fullName = `${parentName} — ${sub.name}`;
+    setZoneName(fullName);
     setLat(sub.lat.toString());
     setLng(sub.lng.toString());
+    setMarks([{ lat: sub.lat, lng: sub.lng, name: fullName }]);
+  }
+
+  function handleAddMark(newLat: number, newLng: number) {
+    const steps = courseSteps[courseType];
+    const stepIndex = Math.min(marks.length, steps.length - 1);
+    const name = steps[stepIndex].name;
+
+    const newMarks = [...marks, { lat: newLat, lng: newLng, name }];
+    setMarks(newMarks);
+
+    if (newMarks.length === 1) {
+      setLat(newLat.toFixed(5));
+      setLng(newLng.toFixed(5));
+      if (!zoneName || zoneName.startsWith("Point:") || zoneName.startsWith("Parcours:")) {
+        setZoneName(`Parcours: ${newLat.toFixed(2)}, ${newLng.toFixed(2)}`);
+      }
+    }
+  }
+
+  function clearMarks() {
+    setMarks([]);
   }
 
   async function handleGenerate() {
@@ -252,6 +308,7 @@ export default function Home() {
       const course: Course = {
         type: courseType,
         orientation: parseInt(orientation) || 0,
+        marks: marks.length > 0 ? marks : undefined,
       };
       const schedule = {
         startTime: `${raceDate}T${startTime}:00`,
@@ -484,7 +541,7 @@ export default function Home() {
       </div>
 
       <div className="mb-8 text-center pt-6">
-        <h1 className="text-4xl font-bold tracking-tight text-slate-900">Regatta</h1>
+        <h1 className="text-4xl font-bold tracking-tight text-slate-900">Regata</h1>
         <p className="mt-2 text-lg text-slate-500">Briefing tactique pour la régate</p>
       </div>
 
@@ -562,12 +619,107 @@ export default function Home() {
             </div>
           )}
 
-          {/* Coordonnées manuelles */}
-          <details className="mt-4">
-            <summary className="cursor-pointer text-xs text-slate-400 hover:text-slate-600">
-              Coordonnées personnalisées
-            </summary>
-            <div className="mt-2 grid grid-cols-3 gap-3">
+          {/* Carte interactive et coordonnées */}
+          <div className="mt-6">
+            {/* Guide contextuel de construction du parcours */}
+            <div className="mb-3 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 p-4">
+              <div className="flex justify-between items-start mb-3">
+                <h3 className="text-sm font-semibold text-blue-900">
+                  Dessinez votre parcours sur la carte
+                </h3>
+                {marks.length > 0 && (
+                  <button onClick={clearMarks} className="text-xs font-medium text-red-500 hover:text-red-700 transition">
+                    Tout effacer
+                  </button>
+                )}
+              </div>
+
+              {/* Étapes visuelles */}
+              {(() => {
+                const steps = courseSteps[courseType];
+                const currentStep = Math.min(marks.length, steps.length - 1);
+                const isComplete = marks.length >= steps.length;
+
+                return (
+                  <>
+                    {/* Barre de progression */}
+                    <div className="flex items-center gap-1 mb-3">
+                      {steps.map((s, i) => (
+                        <div key={i} className="flex items-center flex-1">
+                          <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0 ${
+                            i < marks.length
+                              ? 'bg-green-500 text-white'
+                              : i === currentStep && !isComplete
+                                ? 'bg-blue-600 text-white ring-2 ring-blue-300 ring-offset-1'
+                                : 'bg-slate-200 text-slate-400'
+                          }`}>
+                            {i < marks.length ? '✓' : i + 1}
+                          </div>
+                          {i < steps.length - 1 && (
+                            <div className={`flex-1 h-0.5 mx-1 ${i < marks.length ? 'bg-green-300' : 'bg-slate-200'}`} />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Noms des étapes */}
+                    <div className="flex gap-1 mb-3">
+                      {steps.map((s, i) => (
+                        <div key={i} className="flex-1 min-w-0">
+                          <p className={`text-[10px] leading-tight truncate ${
+                            i < marks.length
+                              ? 'text-green-600'
+                              : i === currentStep && !isComplete
+                                ? 'text-blue-700 font-semibold'
+                                : 'text-slate-400'
+                          }`}>
+                            {s.name}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Instruction courante */}
+                    {!isComplete ? (
+                      <div className="flex items-start gap-2 rounded-md bg-white/70 p-3 border border-blue-100">
+                        <div className="mt-0.5 shrink-0 w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center">
+                          <span className="text-blue-600 text-xs">&#10132;</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-blue-900">
+                            {steps[currentStep].instruction}
+                          </p>
+                          <p className="text-xs text-blue-500 mt-0.5">
+                            {steps[currentStep].tip}
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-start gap-2 rounded-md bg-green-50 p-3 border border-green-200">
+                        <span className="text-green-600 text-sm mt-0.5">&#10003;</span>
+                        <div>
+                          <p className="text-sm font-medium text-green-800">
+                            Parcours complet ({marks.length} marques)
+                          </p>
+                          <p className="text-xs text-green-600 mt-0.5">
+                            Vous pouvez ajouter des marques supplémentaires ou passer à la configuration des horaires.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+
+            <div className="relative z-0 h-[400px] w-full overflow-hidden rounded-xl border border-slate-200">
+              <MapLoader
+                marks={marks}
+                onAddMark={handleAddMark}
+              />
+            </div>
+
+            <div className="mt-3 grid grid-cols-3 gap-3">
               <div className="col-span-3 sm:col-span-1">
                 <label className="text-xs text-slate-500">Zone</label>
                 <input
@@ -586,7 +738,8 @@ export default function Home() {
                   value={lat}
                   onChange={(e) => setLat(e.target.value)}
                   placeholder="47.58"
-                  className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+                  className="mt-1 w-full rounded-lg border px-3 py-2 text-sm bg-slate-50"
+                  readOnly
                 />
               </div>
               <div>
@@ -597,11 +750,12 @@ export default function Home() {
                   value={lng}
                   onChange={(e) => setLng(e.target.value)}
                   placeholder="-3.03"
-                  className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+                  className="mt-1 w-full rounded-lg border px-3 py-2 text-sm bg-slate-50"
+                  readOnly
                 />
               </div>
             </div>
-          </details>
+          </div>
         </div>
 
         {/* Type de parcours */}

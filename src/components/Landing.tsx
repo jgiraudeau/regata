@@ -53,7 +53,7 @@ export default function Landing() {
                         <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/30">
                             <Anchor className="text-white w-6 h-6" />
                         </div>
-                        <h1 className="text-3xl font-bold tracking-tight text-white">Regatta</h1>
+                        <h1 className="text-3xl font-bold tracking-tight text-white">Regata</h1>
                     </div>
 
                     <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300 mb-6 leading-tight">

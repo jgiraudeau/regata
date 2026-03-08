@@ -1,4 +1,5 @@
 import type { WindPoint, WavePoint } from '@/types';
+import { hasSwell } from './geo';
 
 const OPEN_METEO_BASE = 'https://api.open-meteo.com/v1/meteofrance';
 const MARINE_BASE = 'https://marine-api.open-meteo.com/v1/marine';
@@ -46,13 +47,20 @@ export async function fetchWaves(lat: number, lng: number, startDate: string, en
 
   if (!hourly?.time) return [];
 
-  return hourly.time.map((time: string, i: number) => ({
-    time,
-    height: hourly.wave_height[i] ?? 0,
-    period: hourly.wave_period[i] ?? 0,
-    direction: hourly.wave_direction[i] ?? 0,
-    windWaveHeight: hourly.wind_wave_height?.[i],
-    swellHeight: hourly.swell_wave_height?.[i],
-    swellDirection: hourly.swell_wave_direction?.[i],
-  }));
+  const swellPresent = hasSwell(lat, lng);
+
+  return hourly.time.map((time: string, i: number) => {
+    const rawHeight = hourly.wave_height[i] ?? 0;
+    const windWave = hourly.wind_wave_height?.[i] ?? 0;
+
+    return {
+      time,
+      height: swellPresent ? rawHeight : windWave,
+      period: hourly.wave_period[i] ?? 0,
+      direction: hourly.wave_direction[i] ?? 0,
+      windWaveHeight: windWave,
+      swellHeight: swellPresent ? hourly.swell_wave_height?.[i] : 0,
+      swellDirection: swellPresent ? hourly.swell_wave_direction?.[i] : undefined,
+    };
+  });
 }

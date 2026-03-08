@@ -1,8 +1,17 @@
 import type { TideData, TideEvent } from '@/types';
+import { hasTides } from './geo';
 
 const WORLDTIDES_BASE = 'https://www.worldtides.info/api/v3';
 
 export async function fetchTides(lat: number, lng: number, date: string): Promise<TideData> {
+  if (!hasTides(lat, lng)) {
+    return {
+      referencePort: 'Pas de marée',
+      coefficient: 0,
+      events: [],
+    };
+  }
+
   const apiKey = process.env.WORLDTIDES_API_KEY;
 
   if (!apiKey) {
