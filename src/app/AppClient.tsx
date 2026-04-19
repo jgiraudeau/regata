@@ -182,6 +182,15 @@ const zonesByRegion: { region: string; zones: PresetZone[] }[] = [
         ]
       },
       { name: 'Saint-Tropez', lat: 43.27, lng: 6.64, info: 'Golfe, Les Voiles de St-Tropez' },
+      {
+        name: 'Martigues — Étang de Berre', lat: 43.46, lng: 5.10, info: 'Plan d\'eau fermé, Mistral canalisé, eau plate', subZones: [
+          { name: 'Plan d\'eau central', lat: 43.46, lng: 5.10, info: 'Grand fetch NW/SE, Mistral très fort et régulier' },
+          { name: 'Devant Martigues', lat: 43.41, lng: 5.06, info: 'Entrée canal de Caronte, thermique d\'après-midi' },
+          { name: 'Golfe de Saint-Chamas', lat: 43.53, lng: 5.04, info: 'Nord-Ouest de l\'étang, accélérations Mistral' },
+          { name: 'Bras de Berre', lat: 43.47, lng: 5.19, info: 'Nord-Est, abri relatif, thermique marin' },
+          { name: 'Devant Istres', lat: 43.51, lng: 4.98, info: 'Rive Ouest, plan d\'eau dégagé, base nautique' },
+        ]
+      },
       { name: 'Sète', lat: 43.40, lng: 3.70, info: 'Tramontane/Marin, mer formée' },
       { name: 'Port-Camargue', lat: 43.53, lng: 4.13, info: 'Golfe du Lion, Mistral' },
       { name: 'Menton', lat: 43.77, lng: 7.50, info: 'Proche Italie, protection cap Martin' },
