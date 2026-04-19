@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LogOut } from 'lucide-react';
+import { LogOut, Download, FileText, Share2 } from 'lucide-react';
 import type { Zone, Course, CourseType, TacticalBriefing, WindPoint, WavePoint, TideData, Mark } from '@/types';
 import MapLoader from '@/components/MapLoader';
 
@@ -234,7 +234,6 @@ export default function Home() {
     router.refresh();
   }
 
-
   // Config state
   const [zoneName, setZoneName] = useState('');
   const [lat, setLat] = useState('');
@@ -255,6 +254,66 @@ export default function Home() {
 
   const [activeRegion, setActiveRegion] = useState(zonesByRegion[0].region);
   const [selectedParentZone, setSelectedParentZone] = useState<PresetZone | null>(null);
+
+  function buildBriefingText(): string {
+    if (!briefing) return '';
+    const lines: string[] = [
+      `BRIEFING TACTIQUE — ${zoneName}`,
+      `${raceDate} | Départ ${startTime} | ${courseTypes.find(c => c.value === courseType)?.label}`,
+      '='.repeat(60),
+      '',
+      'CONDITIONS',
+      briefing.conditionsSummary,
+      '',
+    ];
+    if (weatherData) {
+      const idx = weatherData.wind.findIndex((w: WindPoint) => w.time.includes(startTime.split(':')[0]));
+      const w = weatherData.wind[idx >= 0 ? idx : 0];
+      lines.push(`Vent : ${(w?.speed / 1.852).toFixed(0)} kts — ${w?.direction}° | Rafales : ${(w?.gusts / 1.852).toFixed(0)} kts`);
+      lines.push('');
+    }
+    lines.push('RECOMMANDATIONS', '-'.repeat(40));
+    briefing.keyRecommendations
+      .sort((a: TacticalBriefing['keyRecommendations'][0], b: TacticalBriefing['keyRecommendations'][0]) => a.priority - b.priority)
+      .forEach((r: TacticalBriefing['keyRecommendations'][0]) => { lines.push(`${r.priority}. ${r.recommendation}${r.timing ? ` [${r.timing}]` : ''}`); });
+    lines.push('', 'OPTIONS FAVORABLES', '-'.repeat(40));
+    briefing.favorableOptions.forEach((o: TacticalBriefing['favorableOptions'][0]) => {
+      lines.push(`• ${o.title} : ${o.description}${o.area ? ` (${o.area})` : ''}`);
+    });
+    lines.push('', 'POINTS DE VIGILANCE', '-'.repeat(40));
+    briefing.unfavorableOptions.forEach((o: TacticalBriefing['unfavorableOptions'][0]) => {
+      lines.push(`• [${o.risk.toUpperCase()}] ${o.title} : ${o.description}`);
+    });
+    if (briefing.timingConsiderations.length > 0) {
+      lines.push('', 'TIMELINE', '-'.repeat(40));
+      briefing.timingConsiderations.forEach((t: TacticalBriefing['timingConsiderations'][0]) => { lines.push(`${t.time} — ${t.event} : ${t.impact}`); });
+    }
+    lines.push('', `Généré le ${new Date().toLocaleString('fr-FR')} via Regata`);
+    return lines.join('\n');
+  }
+
+  function exportTxt() {
+    const text = buildBriefingText();
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `briefing-${zoneName.replace(/\s+/g, '-').toLowerCase()}-${raceDate}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportPdf() { window.print(); }
+
+  async function shareBriefing() {
+    const text = buildBriefingText();
+    if (navigator.share) {
+      await navigator.share({ title: `Briefing Tactique — ${zoneName}`, text });
+    } else {
+      await navigator.clipboard.writeText(text);
+      alert('Briefing copié dans le presse-papier !');
+    }
+  }
 
   function selectPreset(preset: PresetZone | { name: string; lat: number; lng: number; info: string }) {
     setZoneName(preset.name);
@@ -372,17 +431,39 @@ export default function Home() {
   if (step === 'briefing' && briefing) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-8 relative">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-wrap justify-between items-center mb-6 gap-3">
           <button onClick={() => setStep('config')} className="text-sm text-slate-500 hover:text-slate-700">
             ← Nouvelle analyse
           </button>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 text-sm text-slate-500 hover:text-red-600 transition"
-          >
-            Déconnexion
-            <LogOut className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={exportTxt}
+              title="Télécharger en .txt"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition"
+            >
+              <FileText className="w-4 h-4" /> TXT
+            </button>
+            <button
+              onClick={exportPdf}
+              title="Imprimer / Enregistrer en PDF"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition"
+            >
+              <Download className="w-4 h-4" /> PDF
+            </button>
+            <button
+              onClick={shareBriefing}
+              title="Partager"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium transition"
+            >
+              <Share2 className="w-4 h-4" /> Partager
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 text-sm text-slate-500 hover:text-red-600 transition"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         <div className="mb-6">
