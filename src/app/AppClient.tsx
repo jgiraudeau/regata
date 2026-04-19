@@ -676,22 +676,35 @@ export default function Home() {
         <p className="mt-2 text-lg text-slate-500">Briefing tactique pour la régate</p>
       </div>
 
-      {savedSession && (
-        <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-indigo-100 bg-indigo-50 px-4 py-3">
-          <div>
-            <p className="text-sm font-semibold text-indigo-800">Session sauvegardée — {savedSession.zoneName}</p>
-            <p className="text-xs text-indigo-500">{savedSession.raceDate} · enregistrée à {new Date(savedSession.savedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
-          </div>
-          <div className="flex gap-2">
-            <button onClick={restoreSession} className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 transition">
-              Reprendre
-            </button>
-            <button onClick={clearSession} className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 hover:text-red-500 border border-slate-200 transition">
-              Effacer
-            </button>
-          </div>
+      {/* ===== SAUVEGARDE ===== */}
+      <div className="mb-6 rounded-xl bg-white shadow-sm border border-slate-100 overflow-hidden">
+        <div className="flex items-center gap-2 px-5 py-3 bg-slate-50 border-b border-slate-100">
+          <Download className="w-4 h-4 text-slate-500" />
+          <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">Sauvegarde temporaire</h2>
+          <span className="ml-auto text-xs text-slate-400">Durée : {SESSION_TTL_H}h</span>
         </div>
-      )}
+        {savedSession ? (
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 px-5 py-4">
+            <div className="flex-1">
+              <p className="font-semibold text-slate-800">{savedSession.zoneName}</p>
+              <p className="text-sm text-slate-500">{savedSession.raceDate} · sauvegardé à {new Date(savedSession.savedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
+              <p className="text-xs text-amber-600 mt-0.5">⚠ Expire dans {Math.round(SESSION_TTL_H - (Date.now() - new Date(savedSession.savedAt).getTime()) / 3600000)}h</p>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={restoreSession} className="flex-1 sm:flex-none rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition">
+                Reprendre ce briefing
+              </button>
+              <button onClick={clearSession} className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-500 hover:text-red-500 hover:border-red-200 transition">
+                Effacer
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p className="px-5 py-4 text-sm text-slate-400 italic">
+            Aucune session sauvegardée. Votre prochain briefing sera automatiquement conservé ici pendant {SESSION_TTL_H}h.
+          </p>
+        )}
+      </div>
 
       <div className="space-y-6">
         {/* Zone de navigation */}
