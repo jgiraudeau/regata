@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { LogOut, Download, FileText, Share2 } from 'lucide-react';
 import type { Zone, Course, CourseType, TacticalBriefing, WindPoint, WavePoint, TideData, Mark } from '@/types';
@@ -254,6 +254,40 @@ export default function Home() {
 
   const [activeRegion, setActiveRegion] = useState(zonesByRegion[0].region);
   const [selectedParentZone, setSelectedParentZone] = useState<PresetZone | null>(null);
+  const [savedSession, setSavedSession] = useState<{ zoneName: string; raceDate: string; savedAt: string } | null>(null);
+
+  const SESSION_KEY = 'regata_session';
+  const SESSION_TTL_H = 24;
+
+  useEffect(() => {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return;
+    try {
+      const s = JSON.parse(raw);
+      const age = (Date.now() - new Date(s.savedAt).getTime()) / 3600000;
+      if (age < SESSION_TTL_H) setSavedSession({ zoneName: s.zoneName, raceDate: s.raceDate, savedAt: s.savedAt });
+      else localStorage.removeItem(SESSION_KEY);
+    } catch { localStorage.removeItem(SESSION_KEY); }
+  }, []);
+
+  function restoreSession() {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return;
+    try {
+      const s = JSON.parse(raw);
+      setZoneName(s.zoneName); setLat(s.lat); setLng(s.lng);
+      setMarks(s.marks || []); setCourseType(s.courseType); setOrientation(s.orientation);
+      setRaceDate(s.raceDate); setStartTime(s.startTime); setDuration(s.duration); setRaces(s.races);
+      setBriefing(s.briefing); setWeatherData(s.weatherData);
+      setStep('briefing');
+      setSavedSession(null);
+    } catch { localStorage.removeItem(SESSION_KEY); }
+  }
+
+  function clearSession() {
+    localStorage.removeItem(SESSION_KEY);
+    setSavedSession(null);
+  }
 
   function buildBriefingText(): string {
     if (!briefing) return '';
@@ -409,6 +443,13 @@ export default function Home() {
       if (data.course && data.course.orientation !== undefined) {
         setOrientation(data.course.orientation.toString());
       }
+      localStorage.setItem(SESSION_KEY, JSON.stringify({
+        zoneName, lat, lng, marks, courseType,
+        orientation: data.course?.orientation?.toString() ?? orientation,
+        raceDate, startTime, duration, races,
+        briefing: data.briefing, weatherData: data.data,
+        savedAt: new Date().toISOString(),
+      }));
       setStep('briefing');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
@@ -634,6 +675,23 @@ export default function Home() {
         <h1 className="text-4xl font-bold tracking-tight text-slate-900">Regata</h1>
         <p className="mt-2 text-lg text-slate-500">Briefing tactique pour la régate</p>
       </div>
+
+      {savedSession && (
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-indigo-100 bg-indigo-50 px-4 py-3">
+          <div>
+            <p className="text-sm font-semibold text-indigo-800">Session sauvegardée — {savedSession.zoneName}</p>
+            <p className="text-xs text-indigo-500">{savedSession.raceDate} · enregistrée à {new Date(savedSession.savedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={restoreSession} className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 transition">
+              Reprendre
+            </button>
+            <button onClick={clearSession} className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 hover:text-red-500 border border-slate-200 transition">
+              Effacer
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="space-y-6">
         {/* Zone de navigation */}
