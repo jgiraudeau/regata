@@ -12,10 +12,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'lat et lng requis' }, { status: 400 });
     }
 
-    const [wind, waves] = await Promise.all([
-      fetchWind(lat, lng, date, date),
-      fetchWaves(lat, lng, date, date),
-    ]);
+    const wind = await fetchWind(lat, lng, date, date);
+    const waves = await fetchWaves(lat, lng, date, date);
 
     return NextResponse.json({
       wind,

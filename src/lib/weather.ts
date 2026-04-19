@@ -4,6 +4,21 @@ import { hasSwell } from './geo';
 const OPEN_METEO_BASE = 'https://api.open-meteo.com/v1/meteofrance';
 const MARINE_BASE = 'https://marine-api.open-meteo.com/v1/marine';
 
+async function fetchWithRetry(url: string, retries = 3, delayMs = 1000): Promise<Response> {
+  for (let attempt = 0; attempt < retries; attempt++) {
+    const res = await fetch(url);
+    if (res.status === 429) {
+      if (attempt < retries - 1) {
+        await new Promise(r => setTimeout(r, delayMs * (attempt + 1)));
+        continue;
+      }
+      throw new Error('Limite de requêtes météo atteinte, réessayez dans quelques minutes.');
+    }
+    return res;
+  }
+  throw new Error('Impossible de contacter le service météo.');
+}
+
 export async function fetchWind(lat: number, lng: number, startDate: string, endDate: string): Promise<WindPoint[]> {
   const url = new URL(OPEN_METEO_BASE);
   url.searchParams.set('latitude', lat.toString());
@@ -14,7 +29,7 @@ export async function fetchWind(lat: number, lng: number, startDate: string, end
   url.searchParams.set('start_date', startDate);
   url.searchParams.set('end_date', endDate);
 
-  const res = await fetch(url.toString());
+  const res = await fetchWithRetry(url.toString());
   if (!res.ok) throw new Error(`Open-Meteo error: ${res.status}`);
 
   const data = await res.json();
@@ -39,7 +54,7 @@ export async function fetchWaves(lat: number, lng: number, startDate: string, en
   url.searchParams.set('start_date', startDate);
   url.searchParams.set('end_date', endDate);
 
-  const res = await fetch(url.toString());
+  const res = await fetchWithRetry(url.toString());
   if (!res.ok) throw new Error(`Open-Meteo Marine error: ${res.status}`);
 
   const data = await res.json();
