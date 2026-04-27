@@ -24,6 +24,8 @@ export function isInlandLake(lat: number, lng: number): boolean {
   if (lat >= 48.1 && lat <= 48.7 && lng >= 4.2 && lng <= 4.8) return true;
   // Box 5: Centre (Guerlédan, Vassivière, etc)
   if (lat >= 45.7 && lat <= 46.0 && lng >= 1.8 && lng <= 2.0) return true;
+  // Box 6: Autriche / Bavière (Attersee, Chiemsee, etc)
+  if (lat >= 47.0 && lat <= 48.5 && lng >= 11.0 && lng <= 14.5) return true;
 
   // Règle générale grossière pour filtrer le centre de la France (sans la Manche ni l'Atlantique)
   // L'Océan/La Manche c'est en gros: 

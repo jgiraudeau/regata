@@ -221,6 +221,18 @@ const zonesByRegion: { region: string; zones: PresetZone[] }[] = [
       },
     ],
   },
+  {
+    region: 'Autriche',
+    zones: [
+      {
+        name: 'Lac Attersee', lat: 47.90, lng: 13.52, info: 'Lac alpin, vents thermiques (Rosenwind)', subZones: [
+          { name: 'Union-Yacht-Club Attersee', lat: 47.90766, lng: 13.52807, info: 'Club historique, Attersee' },
+          { name: 'Seewalchen', lat: 47.95, lng: 13.58, info: 'Nord du lac' },
+          { name: 'Unterach', lat: 47.81, lng: 13.49, info: 'Sud du lac' },
+        ]
+      },
+    ],
+  },
 ];
 
 type Step = 'config' | 'loading' | 'briefing';
