@@ -2,11 +2,13 @@
 
 import dynamic from 'next/dynamic';
 import React from 'react';
-import type { Mark } from '@/types';
+import type { Mark, CurrentPoint, WindPoint } from '@/types';
 
 interface MapLoaderProps {
     marks: Mark[];
-    onAddMark: (lat: number, lng: number) => void;
+    onAddMark?: (lat: number, lng: number) => void;
+    currentPoints?: CurrentPoint[];
+    windPoint?: WindPoint;
 }
 
 // Loader interactif sans SSR, indispensable pour utiliser window

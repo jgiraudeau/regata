@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { generateBriefing } from '@/lib/briefing';
 import { fetchWind, fetchWaves } from '@/lib/weather';
 import { fetchTides } from '@/lib/tides';
+import { fetchCurrents } from '@/lib/currents';
 import type { Zone, Course, Schedule } from '@/types';
 
 export const maxDuration = 60;
@@ -42,6 +43,8 @@ export async function POST(request: Request) {
       return t >= windowStart && t <= windowEnd;
     });
 
+    const currents = fetchCurrents(zone, tide, date);
+
     // Auto-définition de l'axe du vent si laisser vide ou 0
     if ((course.orientation === 0 || !course.orientation) && relevantWind.length > 0) {
       // Trouver le vent à l'heure la plus proche de startTime ou la première valeur
@@ -60,7 +63,8 @@ export async function POST(request: Request) {
       schedule,
       relevantWind,
       relevantWaves,
-      tide
+      tide,
+      currents
     );
 
     return NextResponse.json({
@@ -70,6 +74,7 @@ export async function POST(request: Request) {
         wind: relevantWind,
         waves: relevantWaves,
         tide,
+        currents,
       },
     });
   } catch (error: any) {
